@@ -4,7 +4,7 @@
 
 CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     :   mInputChannel(UNDEFINED_CHANNEL),
-        mSyncTime(4000)
+        mSyncTime(2500)
 {
     mInputChannelInterface.reset(new AnalyzerSettingInterfaceChannel());
     mInputChannelInterface->SetTitleAndTooltip("CPPM", "Simple CPPM Analyzer");
