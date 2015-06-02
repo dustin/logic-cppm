@@ -29,7 +29,7 @@ void CPPMAnalyzer::WorkerThread()
     mCPPM = GetAnalyzerChannelData(mSettings->mInputChannel);
 
     // Wait for a clean start
-    while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < 4000) {
+    while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < mSettings->mSyncTime) {
         mCPPM->AdvanceToNextEdge();
     }
     mCPPM->AdvanceToNextEdge();
@@ -60,7 +60,7 @@ void CPPMAnalyzer::WorkerThread()
         // states.  Let's just figure it out.
         U64 width = SamplesToUs(end - start);
 
-        if (width >= 4000 && mCPPM->GetBitState() == BIT_LOW) {
+        if (width >= mSettings->mSyncTime && mCPPM->GetBitState() == BIT_LOW) {
             channel = 0;
             mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
 

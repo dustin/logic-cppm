@@ -3,13 +3,22 @@
 
 
 CPPMAnalyzerSettings::CPPMAnalyzerSettings()
-    :   mInputChannel(UNDEFINED_CHANNEL)
+    :   mInputChannel(UNDEFINED_CHANNEL),
+        mSyncTime(4000)
 {
     mInputChannelInterface.reset(new AnalyzerSettingInterfaceChannel());
     mInputChannelInterface->SetTitleAndTooltip("CPPM", "Simple CPPM Analyzer");
     mInputChannelInterface->SetChannel(mInputChannel);
 
+    mSyncTimeInterface.reset(new AnalyzerSettingInterfaceInteger());
+    mSyncTimeInterface->SetTitleAndTooltip("PPM Sync Time Minimum (μS)",
+                                           "Specify the minimum number of microseconds for a PPM sync.");
+    mSyncTimeInterface->SetMax(10000000);
+    mSyncTimeInterface->SetMin(100);
+    mSyncTimeInterface->SetInteger(mSyncTime);
+
     AddInterface(mInputChannelInterface.get());
+    AddInterface(mSyncTimeInterface.get());
 
     AddExportOption(0, "Export as csv file");
     AddExportExtension(0, "csv file", "csv");
@@ -28,6 +37,7 @@ CPPMAnalyzerSettings::~CPPMAnalyzerSettings()
 bool CPPMAnalyzerSettings::SetSettingsFromInterfaces()
 {
     mInputChannel = mInputChannelInterface->GetChannel();
+    mSyncTime = mSyncTimeInterface->GetInteger();
 
     ClearChannels();
     AddChannel(mInputChannel, "CPPM Analyzer", true);
@@ -38,6 +48,7 @@ bool CPPMAnalyzerSettings::SetSettingsFromInterfaces()
 void CPPMAnalyzerSettings::UpdateInterfacesFromSettings()
 {
     mInputChannelInterface->SetChannel(mInputChannel);
+    mSyncTimeInterface->SetInteger(mSyncTime);
 }
 
 void CPPMAnalyzerSettings::LoadSettings(const char *settings)
@@ -46,6 +57,7 @@ void CPPMAnalyzerSettings::LoadSettings(const char *settings)
     text_archive.SetString(settings);
 
     text_archive >> mInputChannel;
+    text_archive >> mSyncTime;
 
     ClearChannels();
     AddChannel(mInputChannel, "Simple CPPM Analyzer", true);
@@ -58,6 +70,7 @@ const char *CPPMAnalyzerSettings::SaveSettings()
     SimpleArchive text_archive;
 
     text_archive << mInputChannel;
+    text_archive << mSyncTime;
 
     return SetReturnString(text_archive.GetString());
 }
