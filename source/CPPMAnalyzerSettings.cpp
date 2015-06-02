@@ -12,7 +12,10 @@ CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     AddInterface(mInputChannelInterface.get());
 
     AddExportOption(0, "Export as csv file");
-    AddExportExtension(0, "csv", "csv");
+    AddExportExtension(0, "csv file", "csv");
+
+    AddExportOption(1, "Export as long form csv file");
+    AddExportExtension(1, "csv file", "csv");
 
     ClearChannels();
     AddChannel(mInputChannel, "CPPM", false);

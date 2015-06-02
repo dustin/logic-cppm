@@ -26,7 +26,7 @@ void CPPMAnalyzerResults::GenerateBubbleText(U64 frame_index, Channel &channel, 
     AddResultString(number_str);
 }
 
-void CPPMAnalyzerResults::GenerateExportFile(const char *file, DisplayBase display_base, U32 export_type_user_id)
+void CPPMAnalyzerResults::wideExport(const char *file)
 {
     std::ofstream file_stream(file, std::ios::out);
 
@@ -77,6 +77,43 @@ void CPPMAnalyzerResults::GenerateExportFile(const char *file, DisplayBase displ
     }
 
     file_stream.close();
+}
+
+void CPPMAnalyzerResults::longExport(const char *file)
+{
+    std::ofstream file_stream(file, std::ios::out);
+
+    U64 num_frames = GetNumFrames();
+
+    U64 trigger_sample = mAnalyzer->GetTriggerSample();
+    U32 sample_rate = mAnalyzer->GetSampleRate();
+
+    file_stream << "Time [s],val,chan" << std::endl;
+
+    for (U32 i = 0; i < num_frames; i++) {
+        Frame frame = GetFrame(i);
+
+        char time_str[128];
+        char number_str[128];
+        AnalyzerHelpers::GetTimeString(frame.mStartingSampleInclusive, trigger_sample, sample_rate, time_str, 128);
+
+        file_stream << time_str << "," << frame.mData1 << "," << frame.mData2 << std::endl;
+        if (UpdateExportProgressAndCheckForCancel(i, num_frames) == true) {
+            file_stream.close();
+            return;
+        }
+    }
+
+    file_stream.close();
+}
+
+void CPPMAnalyzerResults::GenerateExportFile(const char *file, DisplayBase display_base, U32 export_type_user_id)
+{
+    if (export_type_user_id == 0) {
+        wideExport(file);
+    } else {
+        longExport(file);
+    }
 }
 
 void CPPMAnalyzerResults::GenerateFrameTabularText(U64 frame_index, DisplayBase display_base)

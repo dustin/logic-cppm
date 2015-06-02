@@ -21,6 +21,9 @@ public:
 
 protected: //functions
 
+    void wideExport(const char *file);
+    void longExport(const char *file);
+
 protected:  //vars
     CPPMAnalyzerSettings *mSettings;
     CPPMAnalyzer *mAnalyzer;
