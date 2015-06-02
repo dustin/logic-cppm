@@ -19,10 +19,12 @@ public:
     Channel mInputChannel;
     U32 mSyncTime;
     int mSyncDir;
+    int mMaxChan;
 
 protected:
     std::auto_ptr< AnalyzerSettingInterfaceChannel >     mInputChannelInterface;
     std::auto_ptr< AnalyzerSettingInterfaceInteger >     mSyncTimeInterface;
+    std::auto_ptr< AnalyzerSettingInterfaceInteger >     mMaxChanInterface;
     std::auto_ptr< AnalyzerSettingInterfaceNumberList >  mSyncDirInterface;
 };
 

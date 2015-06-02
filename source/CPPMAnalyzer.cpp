@@ -78,6 +78,14 @@ void CPPMAnalyzer::WorkerThread()
         frame.mStartingSampleInclusive = high;
         frame.mEndingSampleInclusive = mCPPM->GetSampleNumber();
 
+
+        if (channel > mSettings->mMaxChan) {
+            mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::ErrorX, mSettings->mInputChannel);
+            frame.mFlags |= DISPLAY_AS_ERROR_FLAG;
+            channel = 0;
+            frame.mData2 = 1;
+        }
+
         mResults->AddFrame(frame);
         mResults->CommitResults();
         ReportProgress(frame.mEndingSampleInclusive);

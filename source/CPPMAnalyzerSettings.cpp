@@ -5,7 +5,8 @@
 CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     :   mInputChannel(UNDEFINED_CHANNEL),
         mSyncTime(2500),
-        mSyncDir(0)
+        mSyncDir(0),
+        mMaxChan(32)
 {
     mInputChannelInterface.reset(new AnalyzerSettingInterfaceChannel());
     mInputChannelInterface->SetTitleAndTooltip("CPPM", "Simple CPPM Analyzer");
@@ -26,9 +27,18 @@ CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     mSyncDirInterface->AddNumber(2, "Low", "Sync signal is low");
     mSyncDirInterface->SetNumber(mSyncDir);
 
+    mMaxChanInterface.reset(new AnalyzerSettingInterfaceInteger());
+    mMaxChanInterface->SetTitleAndTooltip("Maximum Channels",
+                                           "The maximum channel number in a frame.");
+    mMaxChanInterface->SetMax(10000000);
+    mMaxChanInterface->SetMin(1);
+    mMaxChanInterface->SetInteger(mMaxChan);
+
+
     AddInterface(mInputChannelInterface.get());
     AddInterface(mSyncTimeInterface.get());
     AddInterface(mSyncDirInterface.get());
+    AddInterface(mMaxChanInterface.get());
 
     AddExportOption(0, "Export as csv file");
     AddExportExtension(0, "csv file", "csv");
@@ -49,6 +59,7 @@ bool CPPMAnalyzerSettings::SetSettingsFromInterfaces()
     mInputChannel = mInputChannelInterface->GetChannel();
     mSyncTime = mSyncTimeInterface->GetInteger();
     mSyncDir = mSyncDirInterface->GetNumber();
+    mMaxChan = mMaxChanInterface->GetInteger();
 
 
     ClearChannels();
@@ -62,6 +73,7 @@ void CPPMAnalyzerSettings::UpdateInterfacesFromSettings()
     mInputChannelInterface->SetChannel(mInputChannel);
     mSyncTimeInterface->SetInteger(mSyncTime);
     mSyncDirInterface->SetNumber(mSyncDir);
+    mMaxChanInterface->SetInteger(mMaxChan);
 }
 
 void CPPMAnalyzerSettings::LoadSettings(const char *settings)
@@ -72,6 +84,7 @@ void CPPMAnalyzerSettings::LoadSettings(const char *settings)
     text_archive >> mInputChannel;
     text_archive >> mSyncTime;
     text_archive >> mSyncDir;
+    text_archive >> mMaxChan;
 
     ClearChannels();
     AddChannel(mInputChannel, "Simple CPPM Analyzer", true);
@@ -86,6 +99,7 @@ const char *CPPMAnalyzerSettings::SaveSettings()
     text_archive << mInputChannel;
     text_archive << mSyncTime;
     text_archive << mSyncDir;
+    text_archive << mMaxChan;
 
     return SetReturnString(text_archive.GetString());
 }

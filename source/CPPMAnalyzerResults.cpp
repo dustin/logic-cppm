@@ -50,10 +50,11 @@ void CPPMAnalyzerResults::wideExport(const char *file)
     for (int i = 0; i < nchans; i++) {
         file_stream << ",ch" << (i+1);
     }
-    file_stream << std::endl;
+    file_stream << ",error" << std::endl;
 
     for (U32 i = 0; i < num_frames; i+=nchans) {
         Frame frame = GetFrame(i);
+        int flags = 0;
 
         char time_str[128];
         char number_str[128];
@@ -61,8 +62,21 @@ void CPPMAnalyzerResults::wideExport(const char *file)
 
         file_stream << time_str;
 
-        for (int j = 0; j < nchans && i+j < num_frames; j++) {
+        for (int j = 0; j < nchans; j++) {
+            if (i+j >= num_frames) {
+                file_stream << ",";
+                continue;
+            }
+
             Frame frame = GetFrame(i+j);
+            flags |= frame.mFlags;
+
+            // Don't include bogus readings
+            if (frame.mFlags != 0) {
+                i++;
+                j--;
+                continue;
+            }
 
             snprintf(number_str, sizeof(number_str), "%d", frame.mData1);
             file_stream << "," << number_str;
@@ -73,7 +87,7 @@ void CPPMAnalyzerResults::wideExport(const char *file)
             }
         }
 
-        file_stream << std::endl;
+        file_stream << (flags == 0 ? "," : ",error") << std::endl;
     }
 
     file_stream.close();
@@ -88,7 +102,7 @@ void CPPMAnalyzerResults::longExport(const char *file)
     U64 trigger_sample = mAnalyzer->GetTriggerSample();
     U32 sample_rate = mAnalyzer->GetSampleRate();
 
-    file_stream << "Time [s],val,chan" << std::endl;
+    file_stream << "Time [s],val,chan,error" << std::endl;
 
     for (U32 i = 0; i < num_frames; i++) {
         Frame frame = GetFrame(i);
@@ -97,7 +111,9 @@ void CPPMAnalyzerResults::longExport(const char *file)
         char number_str[128];
         AnalyzerHelpers::GetTimeString(frame.mStartingSampleInclusive, trigger_sample, sample_rate, time_str, 128);
 
-        file_stream << time_str << "," << frame.mData1 << "," << frame.mData2 << std::endl;
+        file_stream << time_str << "," << frame.mData1 << "," << frame.mData2
+                    << (frame.mFlags == 0 ? "," : ",error")
+                    << std::endl;
         if (UpdateExportProgressAndCheckForCancel(i, num_frames) == true) {
             file_stream.close();
             return;
