@@ -18,10 +18,12 @@ public:
 
     Channel mInputChannel;
     U32 mSyncTime;
+    int mSyncDir;
 
 protected:
-    std::auto_ptr< AnalyzerSettingInterfaceChannel >    mInputChannelInterface;
-    std::auto_ptr< AnalyzerSettingInterfaceInteger >    mSyncTimeInterface;
+    std::auto_ptr< AnalyzerSettingInterfaceChannel >     mInputChannelInterface;
+    std::auto_ptr< AnalyzerSettingInterfaceInteger >     mSyncTimeInterface;
+    std::auto_ptr< AnalyzerSettingInterfaceNumberList >  mSyncDirInterface;
 };
 
 #endif //CPPM_ANALYZER_SETTINGS

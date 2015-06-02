@@ -4,7 +4,8 @@
 
 CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     :   mInputChannel(UNDEFINED_CHANNEL),
-        mSyncTime(2500)
+        mSyncTime(2500),
+        mSyncDir(0)
 {
     mInputChannelInterface.reset(new AnalyzerSettingInterfaceChannel());
     mInputChannelInterface->SetTitleAndTooltip("CPPM", "Simple CPPM Analyzer");
@@ -17,8 +18,17 @@ CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     mSyncTimeInterface->SetMin(100);
     mSyncTimeInterface->SetInteger(mSyncTime);
 
+    mSyncDirInterface.reset(new AnalyzerSettingInterfaceNumberList());
+    mSyncDirInterface->SetTitleAndTooltip("Sync Direction",
+                                          "Whether the sync is expected to be high or low");
+    mSyncDirInterface->AddNumber(0, "Auto", "Automatically determine sync direction");
+    mSyncDirInterface->AddNumber(1, "High", "Sync signal is high");
+    mSyncDirInterface->AddNumber(2, "Low", "Sync signal is low");
+    mSyncDirInterface->SetNumber(mSyncDir);
+
     AddInterface(mInputChannelInterface.get());
     AddInterface(mSyncTimeInterface.get());
+    AddInterface(mSyncDirInterface.get());
 
     AddExportOption(0, "Export as csv file");
     AddExportExtension(0, "csv file", "csv");
@@ -38,6 +48,8 @@ bool CPPMAnalyzerSettings::SetSettingsFromInterfaces()
 {
     mInputChannel = mInputChannelInterface->GetChannel();
     mSyncTime = mSyncTimeInterface->GetInteger();
+    mSyncDir = mSyncDirInterface->GetNumber();
+
 
     ClearChannels();
     AddChannel(mInputChannel, "CPPM Analyzer", true);
@@ -49,6 +61,7 @@ void CPPMAnalyzerSettings::UpdateInterfacesFromSettings()
 {
     mInputChannelInterface->SetChannel(mInputChannel);
     mSyncTimeInterface->SetInteger(mSyncTime);
+    mSyncDirInterface->SetNumber(mSyncDir);
 }
 
 void CPPMAnalyzerSettings::LoadSettings(const char *settings)
@@ -58,6 +71,7 @@ void CPPMAnalyzerSettings::LoadSettings(const char *settings)
 
     text_archive >> mInputChannel;
     text_archive >> mSyncTime;
+    text_archive >> mSyncDir;
 
     ClearChannels();
     AddChannel(mInputChannel, "Simple CPPM Analyzer", true);
@@ -71,6 +85,7 @@ const char *CPPMAnalyzerSettings::SaveSettings()
 
     text_archive << mInputChannel;
     text_archive << mSyncTime;
+    text_archive << mSyncDir;
 
     return SetReturnString(text_archive.GetString());
 }

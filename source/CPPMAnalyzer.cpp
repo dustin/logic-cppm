@@ -30,7 +30,7 @@ void CPPMAnalyzer::WorkerThread()
 
     // Wait for a clean start
     while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < mSettings->mSyncTime &&
-           mCPPM->GetBitState() == BIT_LOW) {
+           CorrectSyncDir(mCPPM->GetBitState())) {
         mCPPM->AdvanceToNextEdge();
     }
     mCPPM->AdvanceToNextEdge();
@@ -40,7 +40,7 @@ void CPPMAnalyzer::WorkerThread()
 
     U8 channel = 0;
     for (;;) {
-        U64 start = mCPPM->GetSampleNumber(); // Falling Edge
+        U64 start = mCPPM->GetSampleNumber();
         mCPPM->AdvanceToNextEdge();
 
         U64 high = mCPPM->GetSampleNumber();
@@ -61,7 +61,7 @@ void CPPMAnalyzer::WorkerThread()
         // states.  Let's just figure it out.
         U64 width = SamplesToUs(end - start);
 
-        if (width >= mSettings->mSyncTime && mCPPM->GetBitState() == BIT_LOW) {
+        if (width >= mSettings->mSyncTime && CorrectSyncDir(mCPPM->GetBitState())) {
             channel = 0;
             mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
 
@@ -127,4 +127,18 @@ void DestroyAnalyzer(Analyzer *analyzer)
 U64 CPPMAnalyzer::SamplesToUs(U64 samples)
 {
     return (samples * 1000000) / mSampleRateHz;
+}
+
+bool CPPMAnalyzer::CorrectSyncDir(BitState state)
+{
+    // These appear backwards from the settings as they specify the
+    // level before the sync, not at it.
+    switch (mSettings->mSyncDir) {
+    case 1:
+        return state == BIT_LOW;
+    case 2:
+        return state == BIT_HIGH;
+    }
+    // default -- auto
+    return true;
 }

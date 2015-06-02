@@ -31,6 +31,7 @@ protected: //vars
     bool mSimulationInitilized;
 
     U64 SamplesToUs(U64 samples);
+    bool CorrectSyncDir(BitState state);
 
     //CPPM analysis vars:
     U32 mSampleRateHz;
