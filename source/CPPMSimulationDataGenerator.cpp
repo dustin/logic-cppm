@@ -22,7 +22,7 @@ void CPPMSimulationDataGenerator::Initialize(U32 simulation_sample_rate,
 
     mCPPMSimulationData.SetChannel(mSettings->mInputChannel);
     mCPPMSimulationData.SetSampleRate(simulation_sample_rate);
-    mCPPMSimulationData.SetInitialBitState(BIT_LOW);
+    mCPPMSimulationData.SetInitialBitState(BIT_HIGH);
 
     mClockGenerator.Init(1000000, simulation_sample_rate);
 }
@@ -36,7 +36,7 @@ U32 CPPMSimulationDataGenerator::GenerateSimulationData(U64 largest_sample_reque
                                             mSimulationSampleRateHz);
 
     while (mCPPMSimulationData.GetCurrentSampleNumber() < adjusted_largest_sample_requested) {
-        Pulse(pulseLen);
+        Pulse(pulseLen, 8);
         pulseLen += incr;
         if (pulseLen > 2000) {
             pulseLen -= incr;
@@ -51,11 +51,18 @@ U32 CPPMSimulationDataGenerator::GenerateSimulationData(U64 largest_sample_reque
     return 1;
 }
 
-void CPPMSimulationDataGenerator::Pulse(double duration)
+void CPPMSimulationDataGenerator::Pulse(double duration, int channels)
 {
-    mCPPMSimulationData.Advance(mSimulationSampleRateHz / 50);
-
     mCPPMSimulationData.TransitionIfNeeded(BIT_HIGH);
-    mCPPMSimulationData.Advance(mClockGenerator.AdvanceByTimeS(duration * 1E-6));
+    mCPPMSimulationData.Advance(mClockGenerator.AdvanceByTimeS(.005));
     mCPPMSimulationData.TransitionIfNeeded(BIT_LOW);
+
+    for (int i = 0; i < channels; i++) {
+        mCPPMSimulationData.Advance(mClockGenerator.AdvanceByTimeS(.0003));
+        mCPPMSimulationData.TransitionIfNeeded(BIT_HIGH);
+        mCPPMSimulationData.Advance(mClockGenerator.AdvanceByTimeS((duration * 1E-6) - 0.0003));
+        mCPPMSimulationData.TransitionIfNeeded(BIT_LOW);
+    }
+    mCPPMSimulationData.Advance(mClockGenerator.AdvanceByTimeS(.0003));
+    mCPPMSimulationData.TransitionIfNeeded(BIT_HIGH);
 }

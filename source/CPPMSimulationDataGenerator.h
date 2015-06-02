@@ -23,7 +23,7 @@ protected:
     SimulationChannelDescriptor mCPPMSimulationData;
     ClockGenerator mClockGenerator;
 
-    void Pulse(double duration);
+    void Pulse(double duration, int channels);
 
     double pulseLen;
     double incr;
