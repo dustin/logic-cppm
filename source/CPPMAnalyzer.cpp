@@ -29,7 +29,8 @@ void CPPMAnalyzer::WorkerThread()
     mCPPM = GetAnalyzerChannelData(mSettings->mInputChannel);
 
     // Wait for a clean start
-    while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < mSettings->mSyncTime) {
+    while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < mSettings->mSyncTime &&
+           mCPPM->GetBitState() == BIT_LOW) {
         mCPPM->AdvanceToNextEdge();
     }
     mCPPM->AdvanceToNextEdge();
