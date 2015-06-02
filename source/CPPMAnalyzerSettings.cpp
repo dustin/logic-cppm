@@ -19,9 +19,9 @@ CPPMAnalyzerSettings::CPPMAnalyzerSettings()
     mSyncTimeInterface->SetInteger(mSyncTime);
 
     mSyncDirInterface.reset(new AnalyzerSettingInterfaceNumberList());
-    mSyncDirInterface->SetTitleAndTooltip("Sync Direction",
+    mSyncDirInterface->SetTitleAndTooltip("Sync Level",
                                           "Whether the sync is expected to be high or low");
-    mSyncDirInterface->AddNumber(0, "Auto", "Automatically determine sync direction");
+    mSyncDirInterface->AddNumber(0, "Auto", "Automatically determine sync level");
     mSyncDirInterface->AddNumber(1, "High", "Sync signal is high");
     mSyncDirInterface->AddNumber(2, "Low", "Sync signal is low");
     mSyncDirInterface->SetNumber(mSyncDir);
