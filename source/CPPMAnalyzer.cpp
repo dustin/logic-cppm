@@ -32,8 +32,7 @@ void CPPMAnalyzer::WorkerThread()
     while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < 4000) {
         mCPPM->AdvanceToNextEdge();
     }
-    mCPPM->AdvanceToNextEdge(); // Should now be low
-    mCPPM->AdvanceToNextEdge(); // Should now be and high to start sizing first channel
+    mCPPM->AdvanceToNextEdge();
 
     //let's put a dot exactly where we sample this bit:
     mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
@@ -41,16 +40,28 @@ void CPPMAnalyzer::WorkerThread()
     U8 channel = 0;
     for (;;) {
         U64 start = mCPPM->GetSampleNumber(); // Falling Edge
+        mCPPM->AdvanceToNextEdge();
+
+        U64 high = mCPPM->GetSampleNumber();
 
         mCPPM->AdvanceToNextEdge();
 
         U64 end = mCPPM->GetSampleNumber();
 
+        // A complete PPM frame is about 22.5 ms (can vary between
+        // manufacturer).[5] Signal low state is always 0.3 ms. It
+        // begins with a start frame (state high for more than 2
+        // ms). Each channel (up to 8) is encoded by the time of the
+        // high state (PPM high state + 0.3 x (PPM low state) = servo
+        // PWM pulse width).
+        //
+        // The above, while copied from my friendly wikipedia page,
+        // was shown to be incorrect when frsky was giving me .4ms low
+        // states.  Let's just figure it out.
         U64 width = SamplesToUs(end - start);
 
         if (width >= 4000 && mCPPM->GetBitState() == BIT_LOW) {
             channel = 0;
-            mCPPM->AdvanceToNextEdge(); // Falling Edge
             mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
 
             continue;
@@ -63,14 +74,12 @@ void CPPMAnalyzer::WorkerThread()
         frame.mData1 = width;
         frame.mData2 = channel;
         frame.mFlags = 0;
-        frame.mStartingSampleInclusive = start;
+        frame.mStartingSampleInclusive = high;
         frame.mEndingSampleInclusive = mCPPM->GetSampleNumber();
 
         mResults->AddFrame(frame);
         mResults->CommitResults();
         ReportProgress(frame.mEndingSampleInclusive);
-
-        mCPPM->AdvanceToNextEdge(); // Rising edge
     }
 }
 
