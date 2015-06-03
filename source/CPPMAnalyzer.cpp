@@ -85,13 +85,6 @@ void CPPMAnalyzer::WorkerThread()
         frame.mStartingSampleInclusive = high;
         frame.mEndingSampleInclusive = mCPPM->GetSampleNumber();
 
-        if (std::abs(double(width) - prevs[channel-1]) >= mSettings->mMinChange && prevs[channel-1] != width) {
-            mResults->AddMarker(end - ((end - high)/2),
-                                width > prevs[channel-1] ? AnalyzerResults::UpArrow : AnalyzerResults::DownArrow,
-                                mSettings->mInputChannel);
-            prevs[channel-1] = width;
-            frame.mType = 1;
-        }
 
         if (channel > mSettings->mMaxChan) {
             mResults->AddMarker(end - ((end - high)/2),
@@ -99,6 +92,13 @@ void CPPMAnalyzer::WorkerThread()
             frame.mFlags |= DISPLAY_AS_ERROR_FLAG;
             channel = 0;
             frame.mData2 = 1;
+        } else if (std::abs(double(width) - prevs[channel-1]) >= mSettings->mMinChange
+                   && prevs[channel-1] != width) {
+            mResults->AddMarker(end - ((end - high)/2),
+                                width > prevs[channel-1] ? AnalyzerResults::UpArrow : AnalyzerResults::DownArrow,
+                                mSettings->mInputChannel);
+            prevs[channel-1] = width;
+            frame.mType = 1;
         }
 
         mResults->AddFrame(frame);
