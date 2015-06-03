@@ -29,11 +29,16 @@ void CPPMAnalyzer::WorkerThread()
     mCPPM = GetAnalyzerChannelData(mSettings->mInputChannel);
 
     // Wait for a clean start
-    while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < mSettings->mSyncTime &&
-           CorrectSyncDir(mCPPM->GetBitState())) {
+    for (;;) {
+        while (SamplesToUs(mCPPM->GetSampleOfNextEdge() - mCPPM->GetSampleNumber()) < mSettings->mSyncTime) {
+            mCPPM->AdvanceToNextEdge();
+        }
+
         mCPPM->AdvanceToNextEdge();
+        if (CorrectSyncDir(mCPPM->GetBitState())) {
+            break;
+        }
     }
-    mCPPM->AdvanceToNextEdge();
 
     //let's put a dot exactly where we sample this bit:
     mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
