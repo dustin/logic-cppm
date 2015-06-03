@@ -1,3 +1,5 @@
+#include <cmath>
+
 #include "CPPMAnalyzer.h"
 #include "CPPMAnalyzerSettings.h"
 #include <AnalyzerChannelData.h>
@@ -44,6 +46,7 @@ void CPPMAnalyzer::WorkerThread()
     mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
 
     U8 channel = 0;
+    std::vector<double> prevs(mSettings->mMaxChan);
     for (;;) {
         U64 start = mCPPM->GetSampleNumber();
         mCPPM->AdvanceToNextEdge();
@@ -68,21 +71,25 @@ void CPPMAnalyzer::WorkerThread()
 
         if (width >= mSettings->mSyncTime && CorrectSyncDir(mCPPM->GetBitState())) {
             channel = 0;
-            mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::Dot, mSettings->mInputChannel);
 
             continue;
         }
 
         channel++;
 
-        //we have a byte to save.
+        if (std::abs(double(width) - prevs[channel-1]) >= mSettings->mMinChange && prevs[channel-1] != width) {
+            mResults->AddMarker(end - ((end - high)/2),
+                                width > prevs[channel-1] ? AnalyzerResults::UpArrow : AnalyzerResults::DownArrow,
+                                mSettings->mInputChannel);
+            prevs[channel-1] = width;
+        }
+
         Frame frame;
         frame.mData1 = width;
         frame.mData2 = channel;
         frame.mFlags = 0;
         frame.mStartingSampleInclusive = high;
         frame.mEndingSampleInclusive = mCPPM->GetSampleNumber();
-
 
         if (channel > mSettings->mMaxChan) {
             mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::ErrorX, mSettings->mInputChannel);
