@@ -1,6 +1,9 @@
 #ifndef CPPM_SIMULATION_DATA_GENERATOR
 #define CPPM_SIMULATION_DATA_GENERATOR
 
+#include <vector>
+#include <random>
+
 #include <AnalyzerHelpers.h>
 
 #include <SimulationChannelDescriptor.h>
@@ -23,10 +26,12 @@ protected:
     SimulationChannelDescriptor mCPPMSimulationData;
     ClockGenerator mClockGenerator;
 
-    void Pulse(double duration, int channels);
+    void Pulse();
+    double GenDelta();
 
-    double pulseLen;
-    double incr;
+    std::mt19937 rgen;
+    std::exponential_distribution<> rdist;
+    std::vector<double> pulses;
 
 };
 #endif //CPPM_SIMULATION_DATA_GENERATOR
