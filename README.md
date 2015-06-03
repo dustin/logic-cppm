@@ -44,6 +44,17 @@ row will be marked as an error when the channel count got reset
 because of error.  In the long form, the actual erroring value will
 appear on its own with its timestamp and width.
 
+### Minimum Change
+
+Minimum change is a sort of deadband across any changes that prevents
+you from seeing too much noise.  If you set it to 0, there will be a
+marker, label, and search result for each change.
+
+The default of 3 means that a particular channel has to move at least
+3μS before the value is considered significant.  Smaller changes will
+still get a bubble label at the top, but they won't have a distinct
+search result, nor will they get a change marker.
+
 ## Exporting
 
 There are two export formats.
