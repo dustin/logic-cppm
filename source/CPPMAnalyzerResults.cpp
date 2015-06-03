@@ -137,6 +137,10 @@ void CPPMAnalyzerResults::GenerateFrameTabularText(U64 frame_index, DisplayBase 
     Frame frame = GetFrame(frame_index);
     ClearTabularText();
 
+    if (frame.mType == 0) {
+        return;
+    }
+
     char number_str[128];
     snprintf(number_str, sizeof(number_str), "%d:%d", frame.mData2, frame.mData1);
     AddTabularText(number_str);
