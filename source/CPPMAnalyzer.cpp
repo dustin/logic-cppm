@@ -94,7 +94,8 @@ void CPPMAnalyzer::WorkerThread()
         }
 
         if (channel > mSettings->mMaxChan) {
-            mResults->AddMarker(mCPPM->GetSampleNumber(), AnalyzerResults::ErrorX, mSettings->mInputChannel);
+            mResults->AddMarker(end - ((end - high)/2),
+                                AnalyzerResults::ErrorX, mSettings->mInputChannel);
             frame.mFlags |= DISPLAY_AS_ERROR_FLAG;
             channel = 0;
             frame.mData2 = 1;
