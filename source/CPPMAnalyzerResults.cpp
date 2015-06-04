@@ -21,8 +21,12 @@ void CPPMAnalyzerResults::GenerateBubbleText(U64 frame_index, Channel &channel, 
     ClearResultStrings();
     Frame frame = GetFrame(frame_index);
 
+    char channel_str[8];
+    snprintf(channel_str, sizeof(channel_str), "%d", frame.mData2);
     char number_str[128];
-    snprintf(number_str, sizeof(number_str), "%d:%d", frame.mData2, frame.mData1);
+    snprintf(number_str, sizeof(number_str), "%d", frame.mData1);
+    AddResultString(channel_str, ":", number_str, " μS");
+    AddResultString(channel_str, ":", number_str);
     AddResultString(number_str);
 }
 
